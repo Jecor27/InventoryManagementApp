@@ -106,12 +106,26 @@ function listPerishables() {
     return inventory.filter((p) => p instanceof PerishableProduct);
 }
 
+// logging helper that writes output to both console and browser page
+function logMessage(message = '') {
+    console.log(message);
+    if (typeof document !== 'undefined') {
+        const output = document.getElementById('output');
+        if (output) {
+            const block = document.createElement('pre');
+            block.textContent = message;
+            output.appendChild(block);
+        }
+    }
+}
+
 // Export runtime functions for Node usage
 if (typeof module !== 'undefined' && module.exports) {
     module.exports.inventory = inventory;
     module.exports.buildInventoryFromData = buildInventoryFromData;
     module.exports.searchInventory = searchInventory;
     module.exports.listPerishables = listPerishables;
+    module.exports.logMessage = logMessage;
 }
 
 // Analytics: total inventory value, most/least expensive, expired items
@@ -151,51 +165,51 @@ function restockProduct(productName, addQuantity) {
 
 // Demo runner: loads inventory, prints summary, runs searches, and restocks
 async function runDemo() {
-    console.log('Loading inventory...');
+    logMessage('Loading inventory...');
     const json = await loadInventory();
     const data = JSON.parse(json);
     buildInventoryFromData(data);
-    console.log(`Loaded ${inventory.length} products into inventory.`);
+    logMessage(`Loaded ${inventory.length} products into inventory.`);
 
-    console.log('\nInventory items:');
-    inventory.forEach((item) => console.log(' -', item.getInfo()));
+    logMessage('\nInventory items:');
+    inventory.forEach((item) => logMessage(` - ${item.getInfo()}`));
 
     const searchTerms = ['lap', 'milk', 'COF'];
     for (const term of searchTerms) {
         const found = searchInventory(term);
-        console.log(`\nSearch results for '${term}':`);
+        logMessage(`\nSearch results for '${term}':`);
         if (found.length === 0) {
-            console.log('  No products found.');
+            logMessage('  No products found.');
         } else {
-            found.forEach((item) => console.log('  ', item.getInfo()));
+            found.forEach((item) => logMessage(`  ${item.getInfo()}`));
         }
     }
 
-    console.log(`\nTotal inventory value: ${Product.formatPrice(totalInventoryValue())}`);
+    logMessage(`\nTotal inventory value: ${Product.formatPrice(totalInventoryValue())}`);
     const expensive = mostExpensiveProduct();
     const cheap = cheapestProduct();
-    if (expensive) console.log('Most expensive product:', expensive.getInfo());
-    if (cheap) console.log('Cheapest product:', cheap.getInfo());
+    if (expensive) logMessage(`Most expensive product: ${expensive.getInfo()}`);
+    if (cheap) logMessage(`Cheapest product: ${cheap.getInfo()}`);
 
     const expired = expiredProducts();
     if (expired.length > 0) {
-        console.log('\nExpired products:');
-        expired.forEach((item) => console.log('  ', item.getInfo()));
+        logMessage('\nExpired products:');
+        expired.forEach((item) => logMessage(`  ${item.getInfo()}`));
     } else {
-        console.log('\nNo expired products found.');
+        logMessage('\nNo expired products found.');
     }
 
-    console.log('\nStarting restock for Milk (+5) ...');
-    console.log('Program continues while async restock runs...');
+    logMessage('\nStarting restock for Milk (+5) ...');
+    logMessage('Program continues while async restock runs...');
     try {
         const updated = await restockProduct('Milk', 5);
-        console.log(`Restocked ${updated.name}, new quantity: ${updated.quantity}`);
+        logMessage(`Restocked ${updated.name}, new quantity: ${updated.quantity}`);
     } catch (error) {
-        console.error('Restock failed:', error.message);
+        logMessage(`Restock failed: ${error.message}`);
     }
 
-    console.log('\nFinal inventory:');
-    inventory.forEach((item) => console.log(' -', item.getInfo()));
+    logMessage('\nFinal inventory:');
+    inventory.forEach((item) => logMessage(` - ${item.getInfo()}`));
 }
 
 // Run demo when executed in Node or loaded in the browser
