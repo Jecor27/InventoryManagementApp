@@ -212,3 +212,14 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports.restockProduct = restockProduct;
     module.exports.runDemo = runDemo;
 }
+
+/*
+Example output when running this script:
+
+- Loads 6 products from JSON data
+- Displays each item with price, quantity, and expiration if applicable
+- Searches by keyword using case-insensitive RegExp
+- Prints total inventory value and the most/least expensive items
+- Lists any expired perishable products
+- Simulates an async restock and shows the updated quantity
+*/
