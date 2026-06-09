@@ -49,3 +49,26 @@ class PerishableProduct extends Product {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { Product, PerishableProduct };
 }
+
+// Initial product data (represented as JavaScript objects)
+const initialData = [
+    { name: 'Milk', price: 3.5, quantity: 10, expirationDate: '2025-05-01' },
+    { name: 'Bread', price: 2.0, quantity: 20, expirationDate: '2025-04-15' },
+    { name: 'Laptop', price: 1200, quantity: 5 },
+    { name: 'Eggs', price: 0.2, quantity: 60, expirationDate: '2024-12-01' },
+    { name: 'Coffee', price: 8.99, quantity: 15 },
+    { name: 'Yogurt', price: 1.25, quantity: 12, expirationDate: '2024-11-05' }
+];
+
+// Simulate fetching the inventory JSON asynchronously
+function loadInventory() {
+    return new Promise((resolve) => {
+        const json = JSON.stringify(initialData);
+        setTimeout(() => resolve(json), 500); // 500ms simulated delay
+    });
+}
+
+// Export loader for Node usage
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports.loadInventory = loadInventory;
+}
