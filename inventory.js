@@ -72,3 +72,44 @@ function loadInventory() {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports.loadInventory = loadInventory;
 }
+
+// Runtime inventory (array of Product / PerishableProduct instances)
+const inventory = [];
+
+// Build inventory instances from parsed data array
+function buildInventoryFromData(dataArray) {
+    inventory.length = 0; // clear
+    for (const item of dataArray) {
+        if (item.expirationDate) {
+            inventory.push(new PerishableProduct(item.name, item.price, item.quantity, item.expirationDate));
+        } else {
+            inventory.push(new Product(item.name, item.price, item.quantity));
+        }
+    }
+}
+
+// Escape regex special chars in user input
+function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// Search inventory by keyword (case-insensitive) using RegExp
+function searchInventory(keyword) {
+    if (!keyword || typeof keyword !== 'string') return [];
+    const escaped = escapeRegExp(keyword);
+    const regex = new RegExp(escaped, 'i');
+    return inventory.filter((p) => regex.test(p.name));
+}
+
+// List only perishable items
+function listPerishables() {
+    return inventory.filter((p) => p instanceof PerishableProduct);
+}
+
+// Export runtime functions for Node usage
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports.inventory = inventory;
+    module.exports.buildInventoryFromData = buildInventoryFromData;
+    module.exports.searchInventory = searchInventory;
+    module.exports.listPerishables = listPerishables;
+}
