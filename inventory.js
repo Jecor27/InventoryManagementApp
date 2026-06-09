@@ -113,3 +113,31 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports.searchInventory = searchInventory;
     module.exports.listPerishables = listPerishables;
 }
+
+// Analytics: total inventory value, most/least expensive, expired items
+function totalInventoryValue() {
+    const total = inventory.reduce((sum, p) => sum + (p.price * p.quantity), 0);
+    return Math.round(total * 100) / 100; // round to 2 decimals
+}
+
+function mostExpensiveProduct() {
+    if (inventory.length === 0) return null;
+    return inventory.reduce((best, p) => (p.price > best.price ? p : best), inventory[0]);
+}
+
+function cheapestProduct() {
+    if (inventory.length === 0) return null;
+    return inventory.reduce((best, p) => (p.price < best.price ? p : best), inventory[0]);
+}
+
+function expiredProducts() {
+    return inventory.filter((p) => p instanceof PerishableProduct && p.isExpired());
+}
+
+// Export analytics
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports.totalInventoryValue = totalInventoryValue;
+    module.exports.mostExpensiveProduct = mostExpensiveProduct;
+    module.exports.cheapestProduct = cheapestProduct;
+    module.exports.expiredProducts = expiredProducts;
+}
