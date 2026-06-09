@@ -1,9 +1,9 @@
-// Inventory Management Application
-// Implements Product and PerishableProduct classes, JSON load, RegExp search,
-// inventory analytics, and async restock simulation.
+// JavaScript Essentials SBA project: simple inventory management app.
+// Includes Product and PerishableProduct classes, JSON loading, RegExp search,
+// inventory analytics, and an async restock example.
 
 class Product {
-    // static counter to assign unique IDs to each product
+    // count how many products were created
     static count = 0;
 
     constructor(name, price, quantity) {
@@ -13,7 +13,7 @@ class Product {
         this.quantity = Number(quantity);
     }
 
-    // helper static method to format price to 2 decimal places
+    // format a number as a dollar price
     static formatPrice(value) {
         return `$${Number(value).toFixed(2)}`;
     }
@@ -60,11 +60,11 @@ const initialData = [
     { name: 'Yogurt', price: 1.25, quantity: 12, expirationDate: '2024-11-05' }
 ];
 
-// Simulate fetching the inventory JSON asynchronously
+// Simulate fetching inventory data from a database or API
 function loadInventory() {
     return new Promise((resolve) => {
         const json = JSON.stringify(initialData);
-        setTimeout(() => resolve(json), 500); // 500ms simulated delay
+        setTimeout(() => resolve(json), 500); // simulated delay
     });
 }
 
@@ -76,9 +76,9 @@ if (typeof module !== 'undefined' && module.exports) {
 // Runtime inventory (array of Product / PerishableProduct instances)
 const inventory = [];
 
-// Build inventory instances from parsed data array
+// Convert raw data objects into Product or PerishableProduct instances
 function buildInventoryFromData(dataArray) {
-    inventory.length = 0; // clear
+    inventory.length = 0; // clear old inventory
     for (const item of dataArray) {
         if (item.expirationDate) {
             inventory.push(new PerishableProduct(item.name, item.price, item.quantity, item.expirationDate));
@@ -88,7 +88,7 @@ function buildInventoryFromData(dataArray) {
     }
 }
 
-// Escape regex special chars in user input
+// Escape user search input so it is safe inside RegExp
 function escapeRegExp(string) {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -101,7 +101,7 @@ function searchInventory(keyword) {
     return inventory.filter((p) => regex.test(p.name));
 }
 
-// List only perishable items
+// Return only perishable products from the inventory
 function listPerishables() {
     return inventory.filter((p) => p instanceof PerishableProduct);
 }
@@ -134,7 +134,7 @@ function expiredProducts() {
     return inventory.filter((p) => p instanceof PerishableProduct && p.isExpired());
 }
 
-// Simulate asynchronous restock: increases quantity after a delay
+// Simulate an async restock operation that updates a product after a delay
 function restockProduct(productName, addQuantity) {
     return new Promise((resolve, reject) => {
         setTimeout(() => {
@@ -198,8 +198,14 @@ async function runDemo() {
     inventory.forEach((item) => console.log(' -', item.getInfo()));
 }
 
-// Run demo when executed directly
-if (typeof process !== 'undefined' && process.argv && process.argv[1] && process.argv[1].endsWith('inventory.js')) {
+// Run demo when executed in Node or loaded in the browser
+if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof runDemo === 'function') {
+            runDemo();
+        }
+    });
+} else if (typeof process !== 'undefined' && process.argv && process.argv[1] && process.argv[1].endsWith('inventory.js')) {
     runDemo();
 }
 
@@ -214,12 +220,12 @@ if (typeof module !== 'undefined' && module.exports) {
 }
 
 /*
-Example output when running this script:
-
-- Loads 6 products from JSON data
-- Displays each item with price, quantity, and expiration if applicable
-- Searches by keyword using case-insensitive RegExp
-- Prints total inventory value and the most/least expensive items
-- Lists any expired perishable products
-- Simulates an async restock and shows the updated quantity
+Example console output when running this app:
+- Loaded 6 inventory products
+- Printed product info lines
+- Found matches using searchInventory('lap'), searchInventory('milk'), searchInventory('COF')
+- Calculated total inventory value
+- Found the most expensive and cheapest products
+- Checked perishable products for expired items
+- Ran async restock for Milk and showed the new quantity
 */
